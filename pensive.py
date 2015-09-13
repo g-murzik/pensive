@@ -546,10 +546,10 @@ def edit_and_update_form_0(category, tag):
         description = fin.read()
         fin.close()
         if old_description == '':
-            query = "INSERT INTO %s VALUES('%s', '%s');" % (
+            query = """INSERT INTO %s VALUES("%s", "%s");""" % (
                 category, tag, description)
         else:
-            query = "UPDATE %s SET description = '%s' WHERE tag = '%s'" % (
+            query = """UPDATE %s SET description = "%s" WHERE tag = '%s'""" % (
                 category, description, tag)
         cursor.execute(query)
         con.commit()
@@ -601,13 +601,13 @@ def edit_and_update_form_1(category, tag, entry_nr=None):
         description = '\n'.join(lines)
 
         if new_entry:
-            query = "INSERT INTO %s VALUES('%s', %s, '%s', '%s');" % (
+            query = """INSERT INTO %s VALUES("%s", %s, "%s", "%s");""" % (
                 category, tag, posnr, title, description)
         else:
             query = (
                 "UPDATE %s "
-                "SET posnr = %s, title = '%s', description = '%s' "
-                "WHERE title = '%s' AND description = '%s'" % (
+                """SET posnr = %s, title = "%s", description = "%s" """
+                """WHERE title = "%s" AND description = "%s";""" % (
                     category, posnr, title, description,
                     old_title, old_description))
         cursor.execute(query)
@@ -660,14 +660,14 @@ def edit_and_update_form_2(category, tag, entry_nr=None):
                 description = line.split('[description]: ')[1]
         fin.close()
         if new_entry:
-            query = "INSERT INTO %s VALUES('%s', %s, '%s', '%s', '%s')" % (
+            query = """INSERT INTO %s VALUES("%s", %s, "%s", "%s", "%s")""" % (
                 category, tag, posnr, title, description, attachment)
         else:
             query = (
                 "UPDATE %s "
-                "SET posnr = %s, title = '%s', description = '%s', "
-                "attachment = '%s' "
-                "WHERE tag = '%s' AND title = '%s' AND attachment = '%s'" % (
+                """SET posnr = %s, title = "%s", description = "%s", """
+                """attachment = "%s" """
+                """WHERE tag = "%s" AND title = "%s" AND attachment = "%s";""" % (
                     category, posnr, title, description, attachment,
                     tag, old_title, old_attachment))
         cursor.execute(query)
@@ -675,20 +675,20 @@ def edit_and_update_form_2(category, tag, entry_nr=None):
 
 
 def move_format_0_entry(org_cat, org_tag, target_cat, target_tag):
-    querry = "SELECT description FROM %s WHERE tag = '%s'" % (
+    querry = """SELECT description FROM %s WHERE tag = "%s";""" % (
         target_cat, target_tag)
     cursor.execute(querry)
     target_description = cursor.fetchall()
-    querry = "SELECT description FROM %s WHERE tag = '%s'" % (org_cat, org_tag)
+    querry = """SELECT description FROM %s WHERE tag = "%s";""" % (org_cat, org_tag)
     cursor.execute(querry)
     description = cursor.fetchall()[0][0]
     if len(target_description) == 0:
-        querry = "INSERT INTO %s VALUES('%s', '%s')" % (
+        querry = """INSERT INTO %s VALUES("%s", "%s")""" % (
             target_cat, target_tag, description)
     else:
         # attach description to existing description
         description = target_description[0][0] + '\n' + description
-        querry = "UPDATE %s SET description = '%s' WHERE tag = '%s'" % (
+        querry = """UPDATE %s SET description = "%s" WHERE tag = "%s";""" % (
             target_cat, description, target_tag)
 
     cursor.execute(querry)
@@ -697,14 +697,14 @@ def move_format_0_entry(org_cat, org_tag, target_cat, target_tag):
 
 
 def move_format_1_entry(org_cat, org_tag, org_entry_nr, target_cat, target_tag):
-    querry = "SELECT * FROM %s WHERE tag = '%s' ORDER BY posnr" % (
+    querry = """SELECT * FROM %s WHERE tag = "%s" ORDER BY posnr""" % (
         org_cat, org_tag)
     cursor.execute(querry)
     result = cursor.fetchall()
     posnr = result[org_entry_nr][1]
     title = result[org_entry_nr][2]
     description = result[org_entry_nr][3]
-    querry = "INSERT INTO %s VALUES('%s', %s, '%s', '%s');" % (
+    querry = """INSERT INTO %s VALUES("%s", %s, "%s", "%s");""" % (
         target_cat, target_tag, posnr, title, description)
     try:
         cursor.execute(querry)
@@ -715,7 +715,7 @@ def move_format_1_entry(org_cat, org_tag, org_entry_nr, target_cat, target_tag):
 
 
 def move_format_2_entry(org_cat, org_tag, org_entry_nr, target_cat, target_tag):
-    querry = "SELECT * FROM %s WHERE tag = '%s' ORDER BY posnr" % (
+    querry = """SELECT * FROM %s WHERE tag = "%s" ORDER BY posnr""" % (
         org_cat, org_tag)
     cursor.execute(querry)
     result = cursor.fetchall()
@@ -723,7 +723,7 @@ def move_format_2_entry(org_cat, org_tag, org_entry_nr, target_cat, target_tag):
     title = result[org_entry_nr][2]
     description = result[org_entry_nr][3]
     attachment = result[org_entry_nr][4]
-    querry = "INSERT INTO %s VALUES('%s', %s, '%s', '%s', '%s');" % (
+    querry = """INSERT INTO %s VALUES("%s", %s, "%s", "%s", "%s");""" % (
         target_cat, target_tag, posnr, title, description, attachment)
     try:
         cursor.execute(querry)
@@ -791,7 +791,7 @@ def export_results_form_2(category, tag):
 
 def remove_form_0(category, tag):
     """Removes a entry of tag in a category (format 0)."""
-    query = "DELETE FROM %s WHERE tag = '%s'" % (category, tag)
+    query = """DELETE FROM %s WHERE tag = "%s";""" % (category, tag)
     cursor.execute(query)
     con.commit()
 
@@ -799,13 +799,13 @@ def remove_form_0(category, tag):
 def remove_form_1(category, tag, entry_nr):
     """Removes a entry with a certain position of tag in a category of
     format 1."""
-    query = "SELECT * FROM %s WHERE tag = '%s' ORDER BY posnr" % (category, tag)
+    query = """SELECT * FROM %s WHERE tag = "%s" ORDER BY posnr""" % (category, tag)
     cursor.execute(query)
     result = cursor.fetchall()[entry_nr]
     *__, posnr, title, description = result
     query = (
         "DELETE FROM %s "
-        "WHERE tag = '%s' and title = '%s' and description = '%s'" % (
+        """WHERE tag = "%s" and title = "%s" and description = "%s";""" % (
             category, tag, title, description))
     cursor.execute(query)
     con.commit()
@@ -814,13 +814,13 @@ def remove_form_1(category, tag, entry_nr):
 def remove_form_2(category, tag, entry_nr):
     """Removes a entry with a certain position of tag in a category of
     format 2."""
-    query = "SELECT * FROM %s WHERE tag = '%s' ORDER BY posnr" % (category, tag)
+    query = """SELECT * FROM %s WHERE tag = "%s" ORDER BY posnr""" % (category, tag)
     cursor.execute(query)
     result = cursor.fetchall()[entry_nr]
     __, posnr, title, __, attachment = result
     query = (
         "DELETE FROM %s "
-        "WHERE tag = '%s' and title = '%s' and attachment = '%s'" % (
+        """WHERE tag = "%s" and title = "%s" and attachment = "%s";""" % (
             category, tag, title, attachment))
     cursor.execute(query)
     con.commit()
