@@ -129,8 +129,8 @@ def get_categories():
     """
     global catconf
     catconf = []
-    querry = 'SELECT * FROM pensive_conf'
-    cursor.execute(querry)
+    query = 'SELECT * FROM pensive_conf'
+    cursor.execute(query)
     result = cursor.fetchall()
     for catid, category, catformatid in result:
         catconf.append((category, int(catformatid), int(catid)))
@@ -145,8 +145,8 @@ def display_categories():
 
 def add_category_format0(category):
     """Expects a string and adds it as a new category with format 0."""
-    sqlinsert = (len(catconf), category, 0)
-    cursor.execute("INSERT INTO pensive_conf VALUES(?, ?, ?)", sqlinsert)
+    sql_insert = (len(catconf), category, 0)
+    cursor.execute("INSERT INTO pensive_conf VALUES(?, ?, ?)", sql_insert)
     query = (
         "CREATE TABLE %s( "
         "tag TEXT, "
@@ -160,8 +160,8 @@ def add_category_format0(category):
 
 def add_category_format1(category):
     """Expects a string and adds it as a new category with format 1."""
-    sqlinsert = (len(catconf), category, 1)
-    cursor.execute("INSERT INTO pensive_conf VALUES(?, ?, ?)", sqlinsert)
+    sql_insert = (len(catconf), category, 1)
+    cursor.execute("INSERT INTO pensive_conf VALUES(?, ?, ?)", sql_insert)
     query = (
         "CREATE TABLE %s( "
         "tag TEXT, "
@@ -177,8 +177,8 @@ def add_category_format1(category):
 
 def add_category_format2(category):
     """Expects a string and adds it as a new category with format 2."""
-    sqlinsert = (len(catconf), category, 2)
-    cursor.execute("INSERT INTO pensive_conf VALUES(?, ?, ?)", sqlinsert)
+    sql_insert = (len(catconf), category, 2)
+    cursor.execute("INSERT INTO pensive_conf VALUES(?, ?, ?)", sql_insert)
     query = (
         "CREATE TABLE %s( "
         "tag TEXT, "
@@ -209,8 +209,8 @@ def remove_category(category):
         "catformatid INT, "
         "PRIMARY KEY(catid))"))
     for i, (category, catformatid, *__) in enumerate(catconf):
-        sqlinsert = (i, category, catformatid)
-        cursor.execute("INSERT INTO pensive_conf VALUES(?, ?, ?)", sqlinsert)
+        sql_insert = (i, category, catformatid)
+        cursor.execute("INSERT INTO pensive_conf VALUES(?, ?, ?)", sql_insert)
     con.commit()
     get_categories()
 
@@ -536,7 +536,10 @@ def edit_and_update_form_0(category, tag):
         old_description = ''
 
     # paste into temp file and call editor
-    os.system('echo "%s" > %s' % (old_description, temp_file))
+    fout = open(temp_file, mode='w')
+    with fout:
+        for line in old_description.split('\n'):
+            fout.write(line + '\n')
     mod_time_before = os.path.getmtime(temp_file)
     subprocess.call([EDITOR, temp_file])
     mod_time_after = os.path.getmtime(temp_file)
@@ -546,12 +549,12 @@ def edit_and_update_form_0(category, tag):
         description = fin.read()
         fin.close()
         if old_description == '':
-            query = """INSERT INTO %s VALUES("%s", "%s");""" % (
-                category, tag, description)
+            sql_insert = (tag, description)
+            query = "INSERT INTO %s VALUES(?, ?)" % category
         else:
-            query = """UPDATE %s SET description = "%s" WHERE tag = '%s'""" % (
-                category, description, tag)
-        cursor.execute(query)
+            sql_insert = (description, tag)
+            query = "UPDATE %s SET description = ? WHERE tag = ?" % category
+        cursor.execute(query, sql_insert)
         con.commit()
 
 
@@ -565,20 +568,23 @@ def edit_and_update_form_1(category, tag, entry_nr=None):
         cursor.execute(query)
         result = cursor.fetchall()
         __, old_posnr, old_title, old_description = result[entry_nr]
-        tempcontent = (
-            "[posnr]: %s\n"
-            "[title]: %s\n"
-            "[description]:\n"
-            "%s" % (old_posnr, old_title, old_description))
+        tempcontent = [
+            "[posnr]: %s\n" % old_posnr,
+            "[title]: %s\n" % old_title,
+            "[description]:\n",
+            old_description]
     else:
         new_entry = True
-        tempcontent = (
-            "[posnr]: 0\n"
-            "[title]: \n"
-            "[description]: (This line will be skipped)\n")
+        tempcontent = [
+            "[posnr]: 0\n",
+            "[title]: title\n",
+            "[description]: (This line will be skipped)\n"]
 
     # paste into temp file and call editor
-    os.system('echo "%s" > %s' % (tempcontent, temp_file))
+    fout = open(temp_file, mode='w')
+    with fout:
+        for line in tempcontent:
+            fout.write(line)
     mod_time_before = os.path.getmtime(temp_file)
     subprocess.call([EDITOR, temp_file])
     mod_time_after = os.path.getmtime(temp_file)
@@ -588,7 +594,7 @@ def edit_and_update_form_1(category, tag, entry_nr=None):
         fin = open(temp_file)
         lines = []
         for line in fin:
-            line = line.strip()
+            line = line.strip('\n')
             if line.startswith('[posnr]: '):
                 posnr = line.split('[posnr]: ')[1]
             elif line.startswith('[title]: '):
@@ -601,16 +607,15 @@ def edit_and_update_form_1(category, tag, entry_nr=None):
         description = '\n'.join(lines)
 
         if new_entry:
-            query = """INSERT INTO %s VALUES("%s", %s, "%s", "%s");""" % (
-                category, tag, posnr, title, description)
+            sql_insert = (tag, posnr, title, description)
+            query = "INSERT INTO %s VALUES(?, ?, ?, ?)" % category
         else:
+            sql_insert = (posnr, title, description, old_title, old_description)
             query = (
                 "UPDATE %s "
-                """SET posnr = %s, title = "%s", description = "%s" """
-                """WHERE title = "%s" AND description = "%s";""" % (
-                    category, posnr, title, description,
-                    old_title, old_description))
-        cursor.execute(query)
+                "SET posnr = ?, title = ?, description = ? "
+                "WHERE title = ? AND description = ?" % category)
+        cursor.execute(query, sql_insert)
         con.commit()
 
 
@@ -626,22 +631,25 @@ def edit_and_update_form_2(category, tag, entry_nr=None):
         (
             __, old_posnr, old_title, old_description, old_attachment
         ) = result[entry_nr]
-        tempcontent = (
-            "[posnr]: %s\n"
-            "[title]: %s\n"
-            "[attachment]: %s\n"
-            "[description]: %s\n"
-            % (old_posnr, old_title, old_description, old_attachment))
+        tempcontent = [
+            "[posnr]: %s\n" % old_posnr,
+            "[title]: %s\n" % old_title,
+            "[attachment]: %s\n" % old_attachment,
+            "[description]: %s\n" % old_description]
+
     else:
         new_entry = True
-        tempcontent = (
-            "[posnr]: 0\n"
-            "[title]: \n"
-            "[attachment]: /path/to/file, URL or tag\n"
-            "[description]: \n")
+        tempcontent = [
+            "[posnr]: 0\n",
+            "[title]: title\n",
+            "[attachment]: /path/to/file, URL or tag\n",
+            "[description]: \n"]
 
     # paste into temp file and call editor
-    os.system('echo "%s" > %s' % (tempcontent, temp_file))
+    fout = open(temp_file, mode='w')
+    with fout:
+        for line in tempcontent:
+            fout.write(line)
     mod_time_before = os.path.getmtime(temp_file)
     subprocess.call([EDITOR, temp_file])
     mod_time_after = os.path.getmtime(temp_file)
@@ -649,7 +657,7 @@ def edit_and_update_form_2(category, tag, entry_nr=None):
     if mod_time_before != mod_time_after:
         fin = open(temp_file)
         for line in fin:
-            line = line.strip()
+            line = line.strip('\n')
             if line.startswith('[posnr]: '):
                 posnr = line.split('[posnr]: ')[1]
             elif line.startswith('[title]: '):
@@ -660,54 +668,55 @@ def edit_and_update_form_2(category, tag, entry_nr=None):
                 description = line.split('[description]: ')[1]
         fin.close()
         if new_entry:
-            query = """INSERT INTO %s VALUES("%s", %s, "%s", "%s", "%s")""" % (
-                category, tag, posnr, title, description, attachment)
+            sql_insert = (tag, posnr, title, description, attachment)
+            query = "INSERT INTO %s VALUES(?, ?, ?, ?, ?)" % category
         else:
+            sql_insert = (
+                posnr, title, description, attachment, 
+                tag, old_title, old_attachment)
             query = (
                 "UPDATE %s "
-                """SET posnr = %s, title = "%s", description = "%s", """
-                """attachment = "%s" """
-                """WHERE tag = "%s" AND title = "%s" AND attachment = "%s";""" % (
-                    category, posnr, title, description, attachment,
-                    tag, old_title, old_attachment))
-        cursor.execute(query)
+                "SET posnr = ?, title = ?, description = ?, "
+                "attachment = ? "
+                "WHERE tag = ? AND title = ? AND attachment = ?" % category)
+        cursor.execute(query, sql_insert)
         con.commit()
 
 
 def move_format_0_entry(org_cat, org_tag, target_cat, target_tag):
-    querry = """SELECT description FROM %s WHERE tag = "%s";""" % (
+    query = "SELECT description FROM %s WHERE tag = '%s';" % (
         target_cat, target_tag)
-    cursor.execute(querry)
+    cursor.execute(query)
     target_description = cursor.fetchall()
-    querry = """SELECT description FROM %s WHERE tag = "%s";""" % (org_cat, org_tag)
-    cursor.execute(querry)
+    query = "SELECT description FROM %s WHERE tag = '%s'" % (org_cat, org_tag)
+    cursor.execute(query)
     description = cursor.fetchall()[0][0]
     if len(target_description) == 0:
-        querry = """INSERT INTO %s VALUES("%s", "%s")""" % (
-            target_cat, target_tag, description)
+        sql_insert = (target_tag, description)
+        query = "INSERT INTO %s VALUES(?, ?)" % target_cat
     else:
         # attach description to existing description
         description = target_description[0][0] + '\n' + description
-        querry = """UPDATE %s SET description = "%s" WHERE tag = "%s";""" % (
-            target_cat, description, target_tag)
+        sql_insert = (description, target_tag)
+        query = "UPDATE %s SET description = ? WHERE tag = ?" % target_cat
 
-    cursor.execute(querry)
+    cursor.execute(query, sql_insert)
     con.commit()
     remove_form_0(org_cat, org_tag)
 
 
 def move_format_1_entry(org_cat, org_tag, org_entry_nr, target_cat, target_tag):
-    querry = """SELECT * FROM %s WHERE tag = "%s" ORDER BY posnr""" % (
+    query = "SELECT * FROM %s WHERE tag = '%s' ORDER BY posnr" % (
         org_cat, org_tag)
-    cursor.execute(querry)
+    cursor.execute(query)
     result = cursor.fetchall()
     posnr = result[org_entry_nr][1]
     title = result[org_entry_nr][2]
     description = result[org_entry_nr][3]
-    querry = """INSERT INTO %s VALUES("%s", %s, "%s", "%s");""" % (
-        target_cat, target_tag, posnr, title, description)
+    sql_insert = (target_tag, posnr, title, description)
+    query = "INSERT INTO %s VALUES(?, ?, ?, ?)" % target_cat
     try:
-        cursor.execute(querry)
+        cursor.execute(query, sql_insert)
         con.commit()
         remove_form_1(org_cat, org_tag, org_entry_nr)
     except sqlite3.IntegrityError:
@@ -715,20 +724,20 @@ def move_format_1_entry(org_cat, org_tag, org_entry_nr, target_cat, target_tag):
 
 
 def move_format_2_entry(org_cat, org_tag, org_entry_nr, target_cat, target_tag):
-    querry = """SELECT * FROM %s WHERE tag = "%s" ORDER BY posnr""" % (
+    query = "SELECT * FROM %s WHERE tag = '%s' ORDER BY posnr" % (
         org_cat, org_tag)
-    cursor.execute(querry)
+    cursor.execute(query)
     result = cursor.fetchall()
     posnr = result[org_entry_nr][1]
     title = result[org_entry_nr][2]
     description = result[org_entry_nr][3]
     attachment = result[org_entry_nr][4]
-    querry = """INSERT INTO %s VALUES("%s", %s, "%s", "%s", "%s");""" % (
-        target_cat, target_tag, posnr, title, description, attachment)
+    sql_insert = (target_tag, posnr, title, description, attachment)
+    query = "INSERT INTO %s VALUES(?, ?, ?, ?, ?);" % target_cat
     try:
-        cursor.execute(querry)
+        cursor.execute(query, sql_insert)
         con.commit()
-        remove_form_1(org_cat, org_tag, org_entry_nr)
+        remove_form_2(org_cat, org_tag, org_entry_nr)
     except sqlite3.IntegrityError:
         print('An identical entry arleady exists, operation canceled.')
 
@@ -791,7 +800,7 @@ def export_results_form_2(category, tag):
 
 def remove_form_0(category, tag):
     """Removes a entry of tag in a category (format 0)."""
-    query = """DELETE FROM %s WHERE tag = "%s";""" % (category, tag)
+    query = "DELETE FROM %s WHERE tag = '%s';" % (category, tag)
     cursor.execute(query)
     con.commit()
 
@@ -799,30 +808,30 @@ def remove_form_0(category, tag):
 def remove_form_1(category, tag, entry_nr):
     """Removes a entry with a certain position of tag in a category of
     format 1."""
-    query = """SELECT * FROM %s WHERE tag = "%s" ORDER BY posnr""" % (category, tag)
+    query = "SELECT * FROM %s WHERE tag = '%s' ORDER BY posnr" % (category, tag)
     cursor.execute(query)
     result = cursor.fetchall()[entry_nr]
     *__, posnr, title, description = result
+    sql_insert = (tag, title, description)
     query = (
         "DELETE FROM %s "
-        """WHERE tag = "%s" and title = "%s" and description = "%s";""" % (
-            category, tag, title, description))
-    cursor.execute(query)
+        "WHERE tag = ? and title = ? and description = ?" % category)
+    cursor.execute(query, sql_insert)
     con.commit()
 
 
 def remove_form_2(category, tag, entry_nr):
     """Removes a entry with a certain position of tag in a category of
     format 2."""
-    query = """SELECT * FROM %s WHERE tag = "%s" ORDER BY posnr""" % (category, tag)
+    query = "SELECT * FROM %s WHERE tag = '%s' ORDER BY posnr" % (category, tag)
     cursor.execute(query)
     result = cursor.fetchall()[entry_nr]
     __, posnr, title, __, attachment = result
+    sql_insert = (tag, title, attachment)
     query = (
         "DELETE FROM %s "
-        """WHERE tag = "%s" and title = "%s" and attachment = "%s";""" % (
-            category, tag, title, attachment))
-    cursor.execute(query)
+        "WHERE tag = ? and title = ? and attachment = ?" % category)
+    cursor.execute(query, sql_insert)
     con.commit()
 
 
@@ -1010,13 +1019,12 @@ def search_everything(pattern):
     """Seaches the complete pensive database (except attachments) for pattern
     (not case sensitive) and returns a dictionary with additional, case
     sensitive highlighting."""
-    patternsql = '%' + pattern + '%'
+    pattern_sql = '%' + pattern + '%'
     result = dict()
     for category, catformatid, __ in catconf:
         if catformatid == 0:
-            sqlinsert = (category, 'description', patternsql)
-            query = "SELECT * FROM %s WHERE %s LIKE '%s';" % (sqlinsert)
-            cursor.execute(query)
+            query = "SELECT * FROM %s WHERE description LIKE ?" % category
+            cursor.execute(query, (pattern_sql,))
             query_result = cursor.fetchall()
             for tag, description in query_result:
                 hits = []
@@ -1038,13 +1046,12 @@ def search_everything(pattern):
                         result[tag].append((category, '', line))
 
         elif catformatid == 1 or catformatid == 2:
-            sqlinsert = (
-                category, 'title', patternsql, 'description', patternsql)
+            sql_insert = (pattern_sql, pattern_sql)
             query = (
                 "SELECT * FROM %s "
-                "WHERE %s LIKE '%s' OR %s LIKE '%s' "
-                "ORDER BY posnr;" % (sqlinsert))
-            cursor.execute(query)
+                "WHERE title LIKE ? OR description LIKE ? "
+                "ORDER BY posnr;" % category)
+            cursor.execute(query, sql_insert)
             query_result = cursor.fetchall()
             for tag, _, title, description, *__ in query_result:
                 hits = []
@@ -1143,8 +1150,8 @@ def install_pensive_examples():
         "pacman -S  [package]   update or install package\n"
         "pacman -Scc            empty cache\n"
         "pacman -Syy            update package list\n"
-        "pacman -Su             System update\n"
-        "pacman -Qs [package]   Querry search\n"
+        "pacman -Su             system update\n"
+        "pacman -Qs [package]   query search\n"
         "...")
     query = "INSERT INTO %s VALUES('%s', '%s');" % (
         category, tag, form_0_insert)
