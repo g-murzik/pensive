@@ -79,7 +79,7 @@ def get_configuration():
     DB = 'pensive.sqlite'
     BACKUPDIR = 'backups'
     EXPORTDIR = 'exports'
-    EDITOR = 'nano'
+    EDITOR = 'vi'
     BROWSER = 'firefox'
     HIGHLIGHT_TAGS = True
     FORM2MODE = 0
@@ -540,8 +540,12 @@ def edit_and_update_form_0(category, tag):
     # paste into temp file and call editor
     fout = open(temp_file, mode='w')
     with fout:
-        for line in old_description.split('\n'):
-            fout.write(line + '\n')
+        lines = old_description.split('\n')
+        for i, line in enumerate(lines):
+            if i < len(lines)-1:
+                fout.write(line + '\n')
+            else:
+                fout.write(line)
     mod_time_before = os.path.getmtime(temp_file)
     subprocess.call([EDITOR, temp_file])
     mod_time_after = os.path.getmtime(temp_file)
