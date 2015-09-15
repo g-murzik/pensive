@@ -27,6 +27,7 @@ import sqlite3
 from string import ascii_letters, digits
 
 # global variables
+HOME = subprocess.getoutput('echo $HOME')
 TERMINAL_WIDTH = shutil.get_terminal_size()[0]
 BLUE = '\033[94m'
 RED = '\033[31m'
@@ -422,7 +423,8 @@ def show_results_form_2(category, tag):
         attachment_exists = None
         if '://' not in attachment and '/' in attachment:
             attachment_type = 'File'
-            if os.path.exists(attachment):
+            if os.path.exists(attachment) or (attachment.startswith('~/') and
+                    os.path.exists(HOME + attachment[1:])):
                 attachment_exists = True
             else:
                 attachment_exists = False

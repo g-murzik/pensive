@@ -1,10 +1,10 @@
-OVERVIEW
+#OVERVIEW
 
     pensive is a CLI program for organizing knowledge in a wiki similar style.
     Organizing means here to view, edit or remove information without leaving
     the CLI.
 
-DESCRIPTION
+#DESCRIPTION
 
     The overall idea is to manage information with tags like 'pacman',
     'python' or 'python.sqlite3'. As there are different kinds of information
@@ -27,12 +27,12 @@ DESCRIPTION
     Please notice that there is a tutorial included, which can be viewed at
     the initial start of the program.
 
-INSTALLATION
+#INSTALLATION
 
     $ cd pensive
     $ python3 pensive.py
 
-FILES
+#FILES
 
     o pensive.py        the program
     o pensive.conf      plain text configuration file
