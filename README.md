@@ -1,36 +1,39 @@
 #OVERVIEW
 
-    pensive is a CLI program for organizing knowledge in a wiki similar style.
-    Organizing means here to view, edit or remove information without leaving
+    Pensive is a CLI program for organizing knowledge similar to a wiki.
+    In this tool organization means to view, edit or remove information without leaving
     the CLI.
 
 #DESCRIPTION
 
     The overall idea is to manage information with tags like 'pacman',
-    'python' or 'python.sqlite3'. As there are different kinds of information
-    you might want to use, there are three essential formats used in pensive:
+    'python' or 'python.sqlite3'. As there are different types of information
+    you might want to use, three essential formats are employed in pensive:
 
-    Format 0: Plain Text, show everything at once, e.g. command reference
-    Format 1: Separate entries, which can be opened, e.g. some scripts
+    Format 0: Plain Text, shows everything at once, e.g. command references
+    Format 1: Separate entries which can be unfolded, e.g. some scripts
     Format 2: Attachments, e.g. URLs, files or other tags
 
-    In pensive, one can create categories, which are linked to these format
-    numbers. If there is any information of a tag saved in such a category, 
+    In pensive, one can create categories which are linked to the mentioned format
+    numbers. In case any information about a specific tag is saved in a category, 
     it will be displayed in the precise order, in which the categories have
-    been installed. If no information is available, a category information of
-    a tag will be skipped.
+    been installed.
 
-    Categories also determine the way of how you interact with pensive:
+    Categories also determine the way one interacts with pensive:
     They can be addressed by appropriate upper case letters starting from
     'A' in the pensive shell.
 
-    Please notice that there is a tutorial included, which can be viewed at
+    Please note that there is a tutorial included, which can be viewed at
     the initial start of the program.
 
 #INSTALLATION
 
-    $ cd pensive
-    $ python3 pensive.py
+    git clone https://github.com/g-murzik/pensive
+
+#USAGE
+
+    cd pensive
+    python3 pensive.py
 
 #FILES
 

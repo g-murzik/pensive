@@ -244,7 +244,8 @@ def get_tags():
 def display_tags():
     """Print defined_tags ins rows."""
     global TERMINAL_WIDTH
-    TERMINAL_WIDTH = terminalwidth = shutil.get_terminal_size()[0]
+    TERMINAL_WIDTH = shutil.get_terminal_size()[0]
+    TERMINAL_WIDTH = 80
     print('tags:')
     lines = ['']
     i = 0
@@ -350,7 +351,7 @@ def rename_tag(oldtag, newtag):
 
 def get_overview(tag):
     """Retrievs all information about a tag and stores the number of hits in
-    the global variable tag_results like this:
+    the global variable tag_results in the following order:
     [(category, catformatid, number_of_hits)]"""
     global tag_results
     tag_results = []
@@ -527,7 +528,7 @@ def open_attachment_form_2(category, tag, entry_nr):
 
 
 def edit_and_update_form_0(category, tag):
-    """Edite entry with format 0 with EDITOR and save updates, if any."""
+    """Edit entry with format 0 with EDITOR and save updates, if any."""
     temp_file = str(os.getcwd()) + '/pensive.temp'
     query = "SELECT description FROM %s WHERE tag = '%s'" % (category, tag)
     cursor.execute(query)
@@ -565,7 +566,7 @@ def edit_and_update_form_0(category, tag):
 
 
 def edit_and_update_form_1(category, tag, entry_nr=None):
-    """Edite entry with format 1 with EDITOR and save updates, if any."""
+    """Edit entry with format 1 with EDITOR and save updates, if any."""
     temp_file = str(os.getcwd()) + '/pensive.temp'
     new_entry = False
     if entry_nr is not None:
@@ -626,7 +627,7 @@ def edit_and_update_form_1(category, tag, entry_nr=None):
 
 
 def edit_and_update_form_2(category, tag, entry_nr=None):
-    """Edite entry with format 2 with EDITOR and save updates, if any."""
+    """Edit entry with format 2 with EDITOR and save updates, if any."""
     temp_file = str(os.getcwd()) + '/pensive.temp'
     new_entry = False
     if entry_nr is not None:
@@ -1220,11 +1221,11 @@ def do_tutorial():
     Welcome to pensive, a tool for organizing information by command line.
     Organizing means here to view, edit or remove information without leaving
     the CLI. The overall idea is to manage information with tags, like 'pacman',
-    'python' or 'python.sqlite3'. As there are different kinds of information
+    'python' or 'python.sqlite3'. As there are different types of information
     you might want to use, there are three essential formats used in pensive:
     
-    Format 0: Plain Text, show everything at once, e.g. command reference
-    Format 1: Separate entries, which can be opened, e.g. some scripts
+    Format 0: Plain Text, shows everything at once, e.g. command reference
+    Format 1: Separate entries, which can be unfolded, e.g. some scripts
     Format 2: Attachments, e.g. URLs, files or other tags""")
     __ = input('\n[Please press any key to proceed]\n')
     os.system('clear')
@@ -1378,7 +1379,10 @@ def pensive_shell(active_tag=None):
 
     elif uin.startswith('ls '):
         # list tags matching input
-        display_specific_tags(uin[3:])
+        if '*' in uin[3:]:
+            display_specific_tags(uin[3:])
+        else:
+            display_specific_tags(uin[3:] + '*')
         return pensive_shell()
 
     elif uin.startswith('add '):
