@@ -10,7 +10,7 @@ The overall idea is to manage information with tags like 'pacman',
 'python' or 'python.sqlite3'. As there are different types of information
 you might want to use, three essential formats are employed in pensive:
 
-    Format 0: Plain Text, shows everything at once, e.g. command references
+    Format 0: Plain text, shows everything at once, e.g. command references
     Format 1: Separate entries which can be unfolded, e.g. some scripts
     Format 2: Attachments, e.g. URLs, files or other tags
 
@@ -39,11 +39,16 @@ the initial start of the program.
 
     o pensive.py        the program
     o pensive.conf      plain text configuration file
-    o pensive.sqlite    sqlite database, which will be created after first start
+    o pensive.sqlite    sqlite database, which will be created at the first start
     o pensive.temp      a plain text dump file for editing that might be created
+    o LICENSE           GPLv3
 
-##SCREENSHOTS (FORMATS, HELP VIEW)
-![Figure 1](https://github.com/g-murzik/miscellaneous/blob/master/pensive01.png "Format 0")
-![Figure 2](https://github.com/g-murzik/miscellaneous/blob/master/pensive02.png "Format 1")
-![Figure 3](https://github.com/g-murzik/miscellaneous/blob/master/pensive03.png "Format 2")
+##SCREENSHOTS
+###Help view
 ![Figure 4](https://github.com/g-murzik/miscellaneous/blob/master/pensive04.png "help")
+###Format 0 example - plain text
+![Figure 1](https://github.com/g-murzik/miscellaneous/blob/master/pensive01.png "Format 0")
+###Format 1 example - separate entries
+![Figure 2](https://github.com/g-murzik/miscellaneous/blob/master/pensive02.png "Format 1")
+###Format 2 example - attachments
+![Figure 3](https://github.com/g-murzik/miscellaneous/blob/master/pensive03.png "Format 2")
