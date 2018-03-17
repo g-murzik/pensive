@@ -1,10 +1,10 @@
-##OVERVIEW
+## OVERVIEW
 
 Pensive is a CLI program for organizing knowledge similar to a wiki.
 In this tool organization means to view, edit or remove information without leaving
 the CLI.
 
-##DESCRIPTION
+## DESCRIPTION
 
 The overall idea is to manage information with tags like 'pacman',
 'python' or 'python.sqlite3'. As there are different types of information
@@ -26,16 +26,16 @@ They can be addressed by appropriate upper case letters starting from
 Please note that there is a tutorial included, which can be viewed at
 the initial start of the program.
 
-##INSTALLATION
+## INSTALLATION
 
     git clone https://github.com/g-murzik/pensive
 
-##USAGE
+## USAGE
 
     cd pensive
     python3 pensive.py
 
-##FILES
+## FILES
 
     o pensive.py        the program
     o pensive.conf      plain text configuration file
@@ -43,12 +43,12 @@ the initial start of the program.
     o pensive.temp      a plain text dump file for editing that might be created
     o LICENSE           GPLv3
 
-##SCREENSHOTS
-###Help view
+## SCREENSHOTS
+### Help view
 ![Figure 4](https://github.com/g-murzik/miscellaneous/blob/master/pensive04.png "help")
-###Format 0 example - plain text
+### Format 0 example - plain text
 ![Figure 1](https://github.com/g-murzik/miscellaneous/blob/master/pensive01.png "Format 0")
-###Format 1 example - separate entries
+### Format 1 example - separate entries
 ![Figure 2](https://github.com/g-murzik/miscellaneous/blob/master/pensive02.png "Format 1")
-###Format 2 example - attachments
+### Format 2 example - attachments
 ![Figure 3](https://github.com/g-murzik/miscellaneous/blob/master/pensive03.png "Format 2")
